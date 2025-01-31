@@ -1,50 +1,73 @@
-KEYWORDS = {
-    "감정/심리": [
-        "불안", "설렘", "외로움", "우울", "자존감", "소심함", "공허함", "위축감", "결핍", 
-        "불면증", "완벽주의", "우유부단", "강박", "무기력", "번아웃", "새로운 시작", 
-        "희망", "설레는 기대", "자책", "후회"
-    ],
-    "관계": [
-        "썸", "짝사랑", "이별", "SNS", "읽씹", "친구관계", "가족갈등", "직장동료", 
-        "선약취소", "약속", "모임", "술자리", "카톡", "인스타그램", "첫인상", "오해", 
-        "관계단절", "화해", "재회", "새로운 인연"
-    ],
-    "일상/생활": [
-        "출퇴근", "자취", "집콕", "배달음식", "야근", "주말", "데이트", "카페", "운동", 
-        "다이어트", "취미", "공부", "여행", "독서", "영화", "음악", "산책", "쇼핑", 
-        "집들이", "반려동물"
-    ],
-    "고민/걱정": [
-        "취업", "이직", "스펙", "연봉", "결혼압박", "나이듦", "미래계획", "재테크", 
-        "자기계발", "비교의식", "성형", "다이어트", "채무", "독립", "진로", 
-        "업무스트레스", "면접", "경쟁", "실패", "목표상실"
-    ],
-    "장소/공간": [
-        "원룸", "회사", "지하철", "동네카페", "한강공원", "대형마트", "동네골목", "옥상", 
-        "공원", "서점", "영화관", "미용실", "편의점", "병원", "피트니스센터", "한적한 거리", 
-        "번화가", "골목길", "기차역", "공항"
-    ]
+# keywords.py
+REALESTATE_TOPICS = {
+   "계약실무": {
+       "전월세": [
+           {"situation": "계약서 작성", "desc": "계약서 체크포인트"},
+           {"situation": "권리분석", "desc": "등기부등본 읽기"},
+           {"situation": "물건확인", "desc": "현장답사 체크리스트"},
+           {"situation": "가격협상", "desc": "시세 분석과 협상법"}
+       ],
+       "매매": [
+           {"situation": "자금계획", "desc": "대출과 청약"},
+           {"situation": "입지분석", "desc": "상권과 교통"},
+           {"situation": "투자가치", "desc": "시세동향 분석"},
+           {"situation": "세금계산", "desc": "취득세와 보유세"}
+       ]
+   },
+   "실전노하우": {
+       "준비단계": [
+           {"situation": "자금준비", "desc": "저축과 대출"},
+           {"situation": "정보수집", "desc": "매물 검증법"},
+           {"situation": "시기선택", "desc": "시장 진입 시점"}
+       ],
+       "실행단계": [
+           {"situation": "물건선정", "desc": "매물 비교분석"},
+           {"situation": "협상전략", "desc": "가격 협상법"},
+           {"situation": "계약진행", "desc": "계약 프로세스"}
+       ]
+   },
+   "핵심요소": {
+       "실무": ["법률검토", "자금설계", "시세분석", "권리관계", "계약절차"],
+       "전략": ["가격협상", "입지분석", "투자전략", "리스크관리", "시장전망"],
+       "실행": ["현장확인", "서류검토", "자금조달", "절세방안", "등기이전"]
+   }
 }
 
-def get_random_keywords(num_keywords=5):
-    """
-    각 카테고리에서 랜덤하게 키워드를 선택합니다.
-    기본적으로 총 5개의 키워드를 반환합니다.
-    """
-    import random
-    
-    selected = []
-    categories = list(KEYWORDS.keys())
-    
-    # 최소한 각 카테고리에서 하나씩 선택
-    for category in random.sample(categories, min(num_keywords, len(categories))):
-        selected.append(random.choice(KEYWORDS[category]))
-    
-    # 필요한 만큼 추가 키워드 선택
-    while len(selected) < num_keywords:
-        category = random.choice(categories)
-        keyword = random.choice(KEYWORDS[category])
-        if keyword not in selected:
-            selected.append(keyword)
-    
-    return selected
+class TopicSelector:
+   def __init__(self):
+       self.used_combinations = set()
+   
+   def get_unused_topic(self):
+       import random
+       
+       available_combinations = []
+       for category, areas in REALESTATE_TOPICS.items():
+           if category != "핵심요소":
+               for area, topics in areas.items():
+                   for topic in topics:
+                       if topic["situation"] not in self.used_combinations:
+                           practical = random.choice(REALESTATE_TOPICS["핵심요소"]["실무"])
+                           strategy = random.choice(REALESTATE_TOPICS["핵심요소"]["전략"])
+                           execution = random.choice(REALESTATE_TOPICS["핵심요소"]["실행"])
+                           
+                           available_combinations.append({
+                               "category": category,
+                               "area": area,
+                               "situation": topic["situation"],
+                               "desc": topic["desc"],
+                               "practical": practical,
+                               "strategy": strategy,
+                               "execution": execution
+                           })
+       
+       if not available_combinations:
+           return None
+       
+       selected = random.choice(available_combinations)
+       self.used_combinations.add(selected['situation'])
+       return selected
+
+selector = TopicSelector()
+
+def get_topic():
+   return selector.get_unused_topic()

@@ -1,7 +1,8 @@
+# generator.py
 import os
 import anthropic
 from dotenv import load_dotenv
-import random
+from keywords import get_topic
 
 load_dotenv()
 
@@ -10,61 +11,73 @@ class StoryGenerator:
         self.client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         self.series_count = 0
 
-    def generate_story(self, keywords):
+    def generate_story(self):
         self.series_count += 1
-        selected_keywords = random.sample(keywords, random.randint(2, 3))
+        topic = get_topic()
+        
+        if not topic:
+            return None, None
         
         prompt = f"""
-        당신은 27살 여성 작가 '서하영'입니다. '서울, 나의 외로움이 자라는 곳' 연작 시리즈를 연재하고 있습니다.
-        
-        다음 키워드 중에서 자연스럽게 사용할 수 있는 것을 선택하여 에세이를 작성해주세요: {', '.join(selected_keywords)}
+부동산 전문가이자 파이낸셜 플래너로서 '부동산 첫 걸음: 전월세 계약부터 내 집 마련까지'를 작성한다. 실용적인 부동산 가이드로 각 에피소드별로 4000자를 작성한다.
+글 내용에 소제목을 넣지마라. 
+글쓰기 원칙:
+1. 내용과 구성:
+- 실용적인 정보와 팁 (60%)
+- 구체적인 사례와 에피소드 (30%)
+- 전문가 조언 (10%)
+- 자연스러운 흐름으로 구성
 
-        필수 포함 요소:
-        1. 구체적인 장면 묘사
-        - 계절감과 날씨
-        - 시간대와 장소의 디테일한 묘사
-        - 오감을 활용한 생생한 표현
-        - 주변 사람들의 모습과 소리
-        
-        2. 다양한 대화 형식
-        - 현재 진행되는 생생한 대화 (최소 5개 이상의 대화)
-        - 과거 회상 속 대화
-        - 카톡이나 메시지 내용
-        - 내면의 독백
-        
-        3. 감정과 생각의 깊이
-        - 겉으로 드러나는 감정
-        - 속으로 감추고 있는 본심
-        - 과거와 현재를 오가는 생각의 흐름
-        - 나를 돌아보는 성찰
-        
-        4. 분량과 구성
-        - 최소 4000자 이상
-        - 3-4개의 주요 장면으로 구성
-        - 각 장면마다 구체적인 대화 포함
-        - 시간의 흐름에 따른 자연스러운 전개
-        
-        글의 예시적 구성:
-        - 도입: 현재의 구체적인 장면과 생생한 대화
-        - 전개: 과거 회상과 그 속의 대화들
-        - 절정: 갈등이나 깨달음의 순간
-        - 마무리: 현재로 돌아와 새로운 시각으로 바라보는 마무리
-        
-        작가의 시선으로 쓰되, 독자가 현장에 함께 있는 것처럼 생생하게 써주세요.
-        대화는 실제 20대들의 대화처럼 자연스럽게 표현해주세요.
+2. 사례/에피소드 포함:
+- 실제 계약/매매 사례
+- 구체적인 금액과 조건
+- 실패와 성공 사례
+- 주의해야 할 함정
+- 실전 협상 팁
 
-        """
+3. 문체:
+- 다양한 어투 사용: ~다, ~요, ~죠, ~까요?, ~죠?, ~곤 한다, ~기 때문이다, ~곤 하죠, ~이므로, ~요
+- 불필요한 주어 반복 금지
+- 전문용어는 쉽게 설명
+- 구체적이고 명확한 표현
+
+4. 실용성 강화:
+- 구체적인 수치와 법적 근거
+- 실제 계약서 작성 팁
+- 자금 계획 수립 방법
+- 체크리스트와 주의사항
+
+5. 금지사항:
+- 검증되지 않은 정보
+- 불확실한 시장 전망
+- 투기 조장 내용
+- 번호 매기기나 나열식 구성
+
+이번 글의 주제:
+분야: {topic['situation']}
+특징: {topic['desc']}
+핵심요소:
+- 실무: {topic['practical']}
+- 전략: {topic['strategy']}
+- 실행: {topic['execution']}
+
+글의 구성 방향:
+- 도입: 상황 설정과 문제 제시
+- 전개: 구체적인 해결 방법과 팁
+- 사례: 실제 경험과 교훈
+- 마무리: 실용적인 조언과 체크포인트
+"""
 
         try:
             response = self.client.messages.create(
                 model="claude-3-sonnet-20240229",
                 max_tokens=4000,
                 messages=[{
-                    "role": "user",
+                    "role": "user", 
                     "content": prompt
                 }]
             )
-            return response.content[0].text, selected_keywords
+            return response.content[0].text, topic
         except Exception as e:
-            print(f"Error generating story: {e}")
+            print(f"Error generating content: {e}")
             return None, None
